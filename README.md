@@ -1,2 +1,8 @@
 # Console Chess
-Console Chess Game based on JustChess by ivaylokenov.
+
+SadConsole port of JustChess by Ivaylo Kenov (and, by the looks, his students).
+
+This version will work out of the box without the need to change system console size or its font.
+I am also planning to add the missing menu, finish the "TODO"s and rework the input (mouse support).
+
+Work in progress.
