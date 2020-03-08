@@ -1,2 +1,2 @@
-# JustChess
-Console Chess Game for the OOP course at Telerik Academy
+# Console Chess
+Console Chess Game based on JustChess by ivaylokenov.
