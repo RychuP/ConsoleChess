@@ -145,6 +145,7 @@
             }
         }
 
+        // to delete: new implementation in consoleRenderer 
         public static void PrintEmptySquare(ConsoleColor backgroundColor, int top, int left)
         {
             for (int i = 0; i < ConsoleConstants.CharactersPerRowPerBoardSquare; i++)

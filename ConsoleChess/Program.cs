@@ -5,10 +5,11 @@
 
     // Libraries
     using SadConsole;
-    using Microsoft.Xna.Framework;
-    using Console = SadConsole.Console;
+    using Game = SadConsole.Game;
 
     // Chess
+    using Engine;
+    using Engine.Initializations;
     using Renderers;
 
     public static class Program
@@ -17,22 +18,26 @@
         {
 
             // Setup the engine and create the main window (to do: calculate these values)
-            SadConsole.Game.Create(120, 38);
+            Game.Create(120, 38);
 
             // Hook the start event so we can add consoles to the system.
-            SadConsole.Game.OnInitialize = Init;
+            Game.OnInitialize = Init;
 
             // Start the game.
-            SadConsole.Game.Instance.Run();
-            SadConsole.Game.Instance.Dispose();
+            Game.Instance.Run();
+            Game.Instance.Dispose();
         }
 
         static void Init()
         {
-            var console = new ContainerConsole();
-            SadConsole.Global.CurrentScreen = console;
+            var container = new ContainerConsole();
+            Global.CurrentScreen = container;
 
-            var renderer = new ConsoleRenderer(console);
+            var renderer = new ConsoleRenderer(container);
+            // renderer.RenderMainMenu();
+            // var inputProvider = new ConsoleInputProvider();
+            // var chessEngine = new StandardTwoPlayerEngine(renderer, inputProvider);
+
         }
     }
 }

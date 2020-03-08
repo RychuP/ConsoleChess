@@ -11,11 +11,9 @@
     {
         public static void Start()
         {
-            // renderer.RenderMainMenu();
+            
 
-            // var inputProvider = new ConsoleInputProvider();
-
-            // var chessEngine = new StandardTwoPlayerEngine(renderer, inputProvider);
+            
 
             // var gameInitializationStrategy = new StandardStartGameInitializationStrategy();
 

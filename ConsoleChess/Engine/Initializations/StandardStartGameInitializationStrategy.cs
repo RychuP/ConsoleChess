@@ -18,7 +18,7 @@
 
         public StandardStartGameInitializationStrategy()
         {
-            this.figureTypes = new List<Type>
+            figureTypes = new List<Type>
             {
                 typeof(Rook),
                 typeof(Knight),
@@ -33,16 +33,16 @@
 
         public void Initialize(IList<IPlayer> players, IBoard board)
         {
-            this.ValidateStrategy(players, board);
+            ValidateStrategy(players, board);
 
             var firstPlayer = players[0];
             var secondPlayer = players[1];
 
-            this.AddArmyToBoardRow(firstPlayer, board, 8);
-            this.AddPawnsToBoardRow(firstPlayer, board, 7);
+            AddArmyToBoardRow(firstPlayer, board, 8);
+            AddPawnsToBoardRow(firstPlayer, board, 7);
 
-            this.AddPawnsToBoardRow(secondPlayer, board, 2);
-            this.AddArmyToBoardRow(secondPlayer, board, 1);
+            AddPawnsToBoardRow(secondPlayer, board, 2);
+            AddArmyToBoardRow(secondPlayer, board, 1);
         }
 
         private void AddPawnsToBoardRow(IPlayer player, IBoard board, int chessRow)

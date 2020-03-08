@@ -16,10 +16,10 @@
 
     public class ConsoleRenderer : IRenderer
     {
+        readonly Console boardConsole;
         readonly Color DarkSquareColor = Color.DarkGray;
         readonly Color LightSquareColor = Color.Gray;
         readonly int consoleHeight, consoleWidth, borderPadding = 4;
-        readonly Console boardConsole;
 
         public ConsoleRenderer(Console parent)
         {
@@ -30,7 +30,7 @@
                 * ConsoleConstants.CharactersPerColPerBoardSquare) + borderPadding;
 
             // load font
-            var fontMaster = SadConsole.Global.LoadFont("fonts/C64.font");
+            var fontMaster = SadConsole.Global.LoadFont("Fonts/C64.font");
             var halfSizedFont = fontMaster.GetFont(SadConsole.Font.FontSizes.Half);
 
             // create console
@@ -40,7 +40,8 @@
             };
 
             // test
-            PrintBorder(0, 0, 8, 8);
+            var board = new Board.Board();
+            RenderBoard(board);
         }
 
         public void RenderMainMenu()
@@ -50,44 +51,33 @@
 
         public void RenderBoard(IBoard board)
         {
-            /*
-            var currentRowPrint = 0;
-            var currentColPrint = 0;
+            int startRowPrint = 0, currentRowPrint = 0, startColPrint = 0, currentColPrint = 0;
 
-            PrintBorder(0, 0, board.TotalRows, board.TotalCols);
+            PrintBorder(startRowPrint, startColPrint, board.TotalRows, board.TotalCols);
 
-            Console.BackgroundColor = ConsoleColor.White;
             int counter = 1;
             for (int top = 0; top < board.TotalRows; top++)
             {
                 for (int left = 0; left < board.TotalCols; left++)
                 {
-                    currentColPrint = startRowPrint + (left * ConsoleConstants.CharactersPerColPerBoardSquare);
-                    currentRowPrint = startColPrint + (top * ConsoleConstants.CharactersPerRowPerBoardSquare);
+                    int offset = borderPadding / 2;
+                    currentColPrint = startRowPrint + (left * ConsoleConstants.CharactersPerColPerBoardSquare) + offset;
+                    currentRowPrint = startColPrint + (top * ConsoleConstants.CharactersPerRowPerBoardSquare) + offset;
 
-                    ConsoleColor backgroundColor;
-                    if (counter % 2 == 0)
-                    {
-                        backgroundColor = DarkSquareColor;
-                        Console.BackgroundColor = DarkSquareColor;
-                    }
-                    else
-                    {
-                        backgroundColor = LightSquareColor;
-                        Console.BackgroundColor = LightSquareColor;
-                    }
+                    Color backgroundColor = (counter % 2 == 0) ? LightSquareColor : DarkSquareColor;
 
-                    var position = Position.FromArrayCoordinates(top, left, board.TotalRows);
+                    // test
+                    PrintEmptySquare(backgroundColor, currentRowPrint, currentColPrint);
 
-                    var figure = board.GetFigureAtPosition(position);
-                    ConsoleHelpers.PrintFigure(figure, backgroundColor, currentRowPrint, currentColPrint);
+                    // var position = Position.FromArrayCoordinates(top, left, board.TotalRows);
+                    // var figure = board.GetFigureAtPosition(position);
+                    // ConsoleHelpers.PrintFigure(figure, backgroundColor, currentRowPrint, currentColPrint);
 
                     counter++;
                 }
 
                 counter++;
             }
-            */
         }
 
         public void PrintErrorMessage(string errorMessage)
@@ -120,7 +110,6 @@
             }
 
             // row numbers on the left and right of the board
-            int charZero = (char)'0';
             int yStart = startRowPrint + (ConsoleConstants.CharactersPerRowPerBoardSquare / 2);
             for (int i = 0; i < boardTotalRows; i++)
             {
@@ -128,11 +117,21 @@
 
                 // left column
                 x = startColPrint + 1;
-                boardConsole.SetGlyph(x, y, charZero + boardTotalRows - i);
+                boardConsole.SetGlyph(x, y, (char)('0' + boardTotalRows - i));
 
                 // right column
                 x += boardTotalCols * ConsoleConstants.CharactersPerColPerBoardSquare + 1;
-                boardConsole.SetGlyph(x, y, charZero + boardTotalRows - i);
+                boardConsole.SetGlyph(x, y, (char)('0' + boardTotalRows - i));
+            }
+        }
+
+        public void PrintEmptySquare(Color backgroundColor, int top, int left)
+        {
+            for (int y = 0; y < ConsoleConstants.CharactersPerRowPerBoardSquare; y++)
+            {
+                boardConsole.Print(left, top + y, 
+                    new string(' ', ConsoleConstants.CharactersPerColPerBoardSquare),
+                    Color.White, backgroundColor);
             }
         }
     }
