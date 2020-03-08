@@ -23,6 +23,7 @@
                 Console.ForegroundColor = ConsoleColor.Gray;
                 Console.Clear();
                 Console.WriteLine("Please, set the Console window and buffer size to 100x80. For best experience use Raster Fonts 8x8!");
+                Console.ReadKey();
                 Environment.Exit(0);
             }
         }
