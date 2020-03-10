@@ -9,6 +9,9 @@ Planned:
 - finish "TODO"s
 - replace keyboard input with mouse support
 
+
 ## Work in progress (Screenshot)
 
 ![screenshot](/screenshot.png)
+
+![screenshot](/screenshot2.png)
