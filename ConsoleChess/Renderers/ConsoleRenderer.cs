@@ -32,11 +32,12 @@
                 + borderPadding;
 
             // load font
-            var fontMaster = SadConsole.Global.LoadFont("Fonts/rychu.font");
-            var halfSizedFont = fontMaster.GetFont(SadConsole.Font.FontSizes.Half);
+            var fontMaster = SadConsole.Global.LoadFont("Fonts/chess.font");
+            // var halfSizedFont = fontMaster.GetFont(SadConsole.Font.FontSizes.Half);
+            var normalSizedFont = fontMaster.GetFont(SadConsole.Font.FontSizes.One);
 
             // create board console
-            boardConsole = new Console(consoleWidth, consoleHeight, halfSizedFont)
+            boardConsole = new Console(consoleWidth, consoleHeight, normalSizedFont)
             {
                 Parent = parent
             };

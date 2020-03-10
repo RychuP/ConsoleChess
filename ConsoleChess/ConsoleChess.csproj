@@ -12,10 +12,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="Fonts/rychu.font">
+    <None Update="Fonts/chess.font">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Fonts/rychu.png">
+    <None Update="Fonts/chess.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
