@@ -4,9 +4,11 @@ SadConsole port of JustChess by Ivaylo Kenov (and, by the looks of it, his stude
 
 This version will work out of the box without the need to change system console size or its font.
 
-Planned work:
+Planned:
 - add the missing menu
 - finish "TODO"s
 - replace keyboard input with mouse support
 
-Work in progress.
+## Work in progress (Screenshot)
+
+![screenshot](/screenshot.png)
