@@ -1,7 +1,7 @@
 ﻿namespace ConsoleChess.Figures.Contracts
 {
     using System.Collections.Generic;
-
+    using SadConsole;
     using Common;
     using Movements.Contracts;
 
@@ -10,5 +10,7 @@
         ChessColor Color { get; }
 
         ICollection<IMovement> Move(IMovementStrategy movementStrategy);
+
+        int[,] Pattern { get; }
     }
 }

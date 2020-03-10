@@ -12,9 +12,9 @@
 
     public class StandardStartGameInitializationStrategy : IGameInitializationStrategy
     {
-        private const int BoardTotalRowsAndCols = 8;
+        const int BoardTotalRowsAndCols = 8;
 
-        private readonly IList<Type> figureTypes;
+        readonly IList<Type> figureTypes;
 
         public StandardStartGameInitializationStrategy()
         {
@@ -47,6 +47,11 @@
 
         private void AddPawnsToBoardRow(IPlayer player, IBoard board, int chessRow)
         {
+            if (chessRow > BoardTotalRowsAndCols || chessRow < 1)
+            {
+                throw new Exception("Chess row out of bounds!");
+            }
+
             for (int i = 0; i < BoardTotalRowsAndCols; i++)
             {
                 var pawn = new Pawn(player.Color);

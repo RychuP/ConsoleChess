@@ -8,9 +8,21 @@
 
     public class Queen : BaseFigure, IFigure
     {
-        public Queen(ChessColor color)
-            : base(color)
+        static readonly int[,] pattern = {
+            { 0, 0, 0, 0, 0, 0, 0, 0, 0, },
+            { 0, 0, 0, 0, 219, 0, 0, 0, 0, },
+            { 0, 0, 219, 0, 219, 0, 219, 0, 0, },
+            { 0, 0, 0, 219, 0, 219, 0, 0, 0, },
+            { 0, 219, 0, 219, 219, 219, 0, 219, 0, },
+            { 0, 0, 219, 0, 219, 0, 219, 0, 0, },
+            { 0, 0, 219, 219, 0, 219, 219, 0, 0, },
+            { 0, 0, 219, 219, 219, 219, 219, 0, 0, },
+            { 0, 0, 0, 0, 0, 0, 0, 0, 0, }
+        };
+
+        public Queen(ChessColor color) : base(color)
         {
+            Pattern = pattern;
         }
 
         public override ICollection<IMovement> Move(IMovementStrategy strategy)

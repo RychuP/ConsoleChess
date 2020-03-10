@@ -8,9 +8,21 @@
 
     public class Pawn : BaseFigure, IFigure
     {
-        public Pawn(ChessColor color)
-            : base(color)
+        static readonly int[,] pattern = {
+            { 0, 0, 0, 0, 0, 0, 0, 0, 0, },
+            { 0, 0, 0, 0, 0, 0, 0, 0, 0, },
+            { 0, 0, 0, 0, 219, 0, 0, 0, 0, },
+            { 0, 0, 0, 219, 219, 219, 0, 0, 0, },
+            { 0, 0, 0, 219, 219, 219, 0, 0, 0, },
+            { 0, 0, 0, 0, 219, 0, 0, 0, 0, },
+            { 0, 0, 0, 219, 219, 219, 0, 0, 0, },
+            { 0, 0, 219, 219, 219, 219, 219, 0, 0, },
+            { 0, 0, 0, 0, 0, 0, 0, 0, 0, }
+        };
+
+        public Pawn(ChessColor color) : base(color)
         {
+            Pattern = pattern;
         }
 
         public override ICollection<IMovement> Move(IMovementStrategy strategy)

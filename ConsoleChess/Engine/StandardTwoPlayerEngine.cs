@@ -1,11 +1,18 @@
 ﻿namespace ConsoleChess.Engine
 {
+    // .NET
     using System;
     using System.Collections.Generic;
 
+    // Libraries
+    using Console = SadConsole.Console;
+
+    // Chess
     using Board;
     using Board.Contracts;
     using Common;
+    using ConsoleChess.InputProviders;
+    using ConsoleChess.Renderers;
     using Contracts;
     using Figures.Contracts;
     using InputProviders.Contracts;
@@ -17,28 +24,27 @@
 
     public class StandardTwoPlayerEngine : IChessEngine
     {
-        private readonly IRenderer renderer;
-        private readonly IInputProvider input;
-        private readonly IBoard board;
-        private readonly IMovementStrategy movementStrategy;
+        readonly IMovementStrategy movementStrategy;
+        readonly IRenderer renderer;
+        readonly IInputProvider input;
+        readonly IBoard board;
+        IList<IPlayer> players;
+        int currentPlayerIndex;
 
-        private IList<IPlayer> players;
 
-        private int currentPlayerIndex;
-
-        public StandardTwoPlayerEngine(IRenderer renderer, IInputProvider inputProvider)
+        public StandardTwoPlayerEngine(Console container)
         {
-            this.renderer = renderer;
-            this.input = inputProvider;
-            this.movementStrategy = new NormalMovementStrategy();
-            this.board = new Board();
+            movementStrategy = new NormalMovementStrategy();
+            renderer = new ConsoleRenderer(container);
+            input = new ConsoleInputProvider();
+            board = new Board();
         }
 
         public IEnumerable<IPlayer> Players
         {
             get
             {
-                return new List<IPlayer>(this.players);
+                return new List<IPlayer>(players);
             }
         }
 
@@ -46,15 +52,15 @@
         {
             // TODO: remove using JustChess.Players and use the input for players
             // TODO: BUG: if players are changed - board is reversed
-            this.players = new List<IPlayer> 
+            players = new List<IPlayer> 
             {
                 new Player("Gosho", ChessColor.Black),
                 new Player("Pesho", ChessColor.White)
             }; // this.input.GetPlayers(GlobalConstants.StandardGameNumberOfPlayers);
 
-            this.SetFirstPlayerIndex();
-            gameInitializationStrategy.Initialize(this.players, this.board);
-            this.renderer.RenderBoard(this.board);
+            SetFirstPlayerIndex();
+            gameInitializationStrategy.Initialize(players, board);
+            renderer.RenderBoard(board);
         }
 
         public void Start()

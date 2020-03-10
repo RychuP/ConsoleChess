@@ -11,8 +11,8 @@
     // Chess
     using Board.Contracts;
     using Common;
-    using Common.Console;
     using Contracts;
+    using Figures.Contracts;
 
     public class ConsoleRenderer : IRenderer
     {
@@ -25,23 +25,21 @@
         {
             // calculate size for the boardConsole
             consoleHeight = (GlobalConstants.StandardGameTotalBoardRows
-                * ConsoleConstants.CharactersPerRowPerBoardSquare) + borderPadding;
+                * GlobalConstants.CharactersPerRowPerBoardSquare) 
+                + borderPadding;
             consoleWidth = (GlobalConstants.StandardGameTotalBoardCols
-                * ConsoleConstants.CharactersPerColPerBoardSquare) + borderPadding;
+                * GlobalConstants.CharactersPerColPerBoardSquare) 
+                + borderPadding;
 
             // load font
-            var fontMaster = SadConsole.Global.LoadFont("Fonts/C64.font");
+            var fontMaster = SadConsole.Global.LoadFont("Fonts/rychu.font");
             var halfSizedFont = fontMaster.GetFont(SadConsole.Font.FontSizes.Half);
 
-            // create console
+            // create board console
             boardConsole = new Console(consoleWidth, consoleHeight, halfSizedFont)
             {
                 Parent = parent
             };
-
-            // test
-            var board = new Board.Board();
-            RenderBoard(board);
         }
 
         public void RenderMainMenu()
@@ -51,27 +49,24 @@
 
         public void RenderBoard(IBoard board)
         {
-            int startRowPrint = 0, currentRowPrint = 0, startColPrint = 0, currentColPrint = 0;
+            int startX = 0, startY = 0, currentX, currentY;
 
-            PrintBorder(startRowPrint, startColPrint, board.TotalRows, board.TotalCols);
+            PrintBorder(startX, startY, board.TotalRows, board.TotalCols);
 
             int counter = 1;
-            for (int top = 0; top < board.TotalRows; top++)
+            for (int y = 0; y < board.TotalRows; y++)
             {
-                for (int left = 0; left < board.TotalCols; left++)
+                for (int x = 0; x < board.TotalCols; x++)
                 {
                     int offset = borderPadding / 2;
-                    currentColPrint = startRowPrint + (left * ConsoleConstants.CharactersPerColPerBoardSquare) + offset;
-                    currentRowPrint = startColPrint + (top * ConsoleConstants.CharactersPerRowPerBoardSquare) + offset;
+                    currentX = startX + (x * GlobalConstants.CharactersPerColPerBoardSquare) + offset;
+                    currentY = startY + (y * GlobalConstants.CharactersPerRowPerBoardSquare) + offset;
 
                     Color backgroundColor = (counter % 2 == 0) ? LightSquareColor : DarkSquareColor;
 
-                    // test
-                    PrintEmptySquare(backgroundColor, currentRowPrint, currentColPrint);
-
-                    // var position = Position.FromArrayCoordinates(top, left, board.TotalRows);
-                    // var figure = board.GetFigureAtPosition(position);
-                    // ConsoleHelpers.PrintFigure(figure, backgroundColor, currentRowPrint, currentColPrint);
+                    var position = Position.FromArrayCoordinates(y, x, board.TotalRows);
+                    var figure = board.GetFigureAtPosition(position);
+                    PrintFigure(figure, backgroundColor, currentX, currentY);
 
                     counter++;
                 }
@@ -85,7 +80,7 @@
 
         }
 
-        private void PrintBorder(int startRowPrint, int startColPrint, int boardTotalRows, int boardTotalCols)
+        void PrintBorder(int startX, int startY, int boardTotalRows, int boardTotalCols)
         {
             int x, y;
 
@@ -95,43 +90,61 @@
             boardConsole.DrawBox(rect, cell);
 
             // column letters above and below board
-            int xStart = startColPrint + (ConsoleConstants.CharactersPerColPerBoardSquare / 2);
+            int xStart = startX + (GlobalConstants.CharactersPerColPerBoardSquare / 2);
             for (int i = 0; i < boardTotalCols; i++)
             {
-                x = xStart + (i * ConsoleConstants.CharactersPerRowPerBoardSquare) + borderPadding / 2;
+                x = xStart + (i * GlobalConstants.CharactersPerRowPerBoardSquare) + borderPadding / 2;
 
                 // top row
-                y = startRowPrint + 1;
+                y = startY + 1;
                 boardConsole.SetGlyph(x, y, (char)('A' + i));
 
                 // bottom row
-                y += boardTotalRows * ConsoleConstants.CharactersPerRowPerBoardSquare + 1;
+                y += boardTotalRows * GlobalConstants.CharactersPerRowPerBoardSquare + 1;
                 boardConsole.SetGlyph(x, y, (char)('A' + i));
             }
 
             // row numbers on the left and right of the board
-            int yStart = startRowPrint + (ConsoleConstants.CharactersPerRowPerBoardSquare / 2);
+            int yStart = startY + (GlobalConstants.CharactersPerRowPerBoardSquare / 2);
             for (int i = 0; i < boardTotalRows; i++)
             {
-                y = yStart + (i * ConsoleConstants.CharactersPerColPerBoardSquare) + borderPadding / 2;
+                y = yStart + (i * GlobalConstants.CharactersPerColPerBoardSquare) + borderPadding / 2;
 
                 // left column
-                x = startColPrint + 1;
+                x = startX + 1;
                 boardConsole.SetGlyph(x, y, (char)('0' + boardTotalRows - i));
 
                 // right column
-                x += boardTotalCols * ConsoleConstants.CharactersPerColPerBoardSquare + 1;
+                x += boardTotalCols * GlobalConstants.CharactersPerColPerBoardSquare + 1;
                 boardConsole.SetGlyph(x, y, (char)('0' + boardTotalRows - i));
             }
         }
 
-        public void PrintEmptySquare(Color backgroundColor, int top, int left)
+        void PrintEmptySquare(Color backgroundColor, int currentX, int currentY)
         {
-            for (int y = 0; y < ConsoleConstants.CharactersPerRowPerBoardSquare; y++)
+            for (int y = 0; y < GlobalConstants.CharactersPerRowPerBoardSquare; y++)
             {
-                boardConsole.Print(left, top + y, 
-                    new string(' ', ConsoleConstants.CharactersPerColPerBoardSquare),
+                boardConsole.Print(currentX, currentY + y, 
+                    new string(' ', GlobalConstants.CharactersPerColPerBoardSquare),
                     Color.White, backgroundColor);
+            }
+        }
+
+        void PrintFigure(IFigure figure, Color backgroundColor, int currentX, int currentY)
+        {
+            if (figure is null)
+            {
+                PrintEmptySquare(backgroundColor, currentX, currentY);
+                return;
+            }
+
+            for (int y = 0; y < figure.Pattern.GetLength(0); y++)
+            {
+                for (int x = 0; x < figure.Pattern.GetLength(1); x++)
+                {
+                    boardConsole.SetGlyph(currentX + x, currentY + y, figure.Pattern[y, x],
+                        figure.Color.ToConsoleColor(), backgroundColor);
+                }
             }
         }
     }
