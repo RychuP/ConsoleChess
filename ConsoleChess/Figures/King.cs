@@ -20,9 +20,21 @@
             { 0, 0, 0, 0, 0, 0, 0, 0, 0, }
         };
 
+        static readonly int[,] pattern2 = {
+            { 0, 0, 0, 0, 0, 0, 0, 0, 0, },
+            { 0, 0, 0, 172,173, 174, 0, 0, 0 },
+            { 0, 0, 175, 176, 177, 178, 179, 0, 0 },
+            { 0, 180, 64, 93, 181, 182, 64, 183, 0 },
+            { 0, 184, 64, 64, 64, 64, 64, 185, 0 },
+            { 0, 186, 64, 64, 64, 64, 64, 187, 0 },
+            { 0, 0, 188, 189, 190, 191, 192, 0, 0 },
+            { 0, 0, 193, 194, 64, 195, 196, 0, 0 },
+            { 0, 0, 0, 0, 0, 0, 0, 0, 0, }
+        };
+
         public King(ChessColor color) : base(color)
         {
-            Pattern = pattern;
+            Pattern = pattern2;
         }
 
         public override ICollection<IMovement> Move(IMovementStrategy strategy)

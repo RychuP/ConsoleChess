@@ -125,8 +125,9 @@
         {
             for (int y = 0; y < GlobalConstants.CharactersPerRowPerBoardSquare; y++)
             {
+                char emptySpace = (char) 0;
                 boardConsole.Print(currentX, currentY + y, 
-                    new string(' ', GlobalConstants.CharactersPerColPerBoardSquare),
+                    new string(emptySpace, GlobalConstants.CharactersPerColPerBoardSquare),
                     Color.White, backgroundColor);
             }
         }
