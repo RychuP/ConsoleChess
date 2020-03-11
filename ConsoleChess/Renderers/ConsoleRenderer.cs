@@ -19,25 +19,15 @@
         readonly Console boardConsole;
         readonly Color DarkSquareColor = Color.DarkGray;
         readonly Color LightSquareColor = Color.Gray;
-        readonly int consoleHeight, consoleWidth, borderPadding = 4;
 
-        public ConsoleRenderer(Console parent)
+        public ConsoleRenderer(ContainerConsole parent)
         {
-            // calculate size for the boardConsole
-            consoleHeight = (GlobalConstants.StandardGameTotalBoardRows
-                * GlobalConstants.CharactersPerRowPerBoardSquare) 
-                + borderPadding;
-            consoleWidth = (GlobalConstants.StandardGameTotalBoardCols
-                * GlobalConstants.CharactersPerColPerBoardSquare) 
-                + borderPadding;
-
             // load font
             var fontMaster = SadConsole.Global.LoadFont("Fonts/chess.font");
-            // var halfSizedFont = fontMaster.GetFont(SadConsole.Font.FontSizes.Half);
             var normalSizedFont = fontMaster.GetFont(SadConsole.Font.FontSizes.One);
 
             // create board console
-            boardConsole = new Console(consoleWidth, consoleHeight, normalSizedFont)
+            boardConsole = new Console(GlobalConstants.BoardWidth, GlobalConstants.BoardHeight, normalSizedFont)
             {
                 Parent = parent
             };
@@ -59,7 +49,7 @@
             {
                 for (int x = 0; x < board.TotalCols; x++)
                 {
-                    int offset = borderPadding / 2;
+                    int offset = GlobalConstants.BoardPadding / 2;
                     currentX = startX + (x * GlobalConstants.CharactersPerColPerBoardSquare) + offset;
                     currentY = startY + (y * GlobalConstants.CharactersPerRowPerBoardSquare) + offset;
 
@@ -86,7 +76,7 @@
             int x, y;
 
             // border
-            var rect = new Rectangle(0, 0, consoleWidth, consoleHeight);
+            var rect = new Rectangle(0, 0, GlobalConstants.BoardWidth, GlobalConstants.BoardHeight);
             var cell = new Cell(Color.White, DarkSquareColor, 0);
             boardConsole.DrawBox(rect, cell);
 
@@ -94,7 +84,8 @@
             int xStart = startX + (GlobalConstants.CharactersPerColPerBoardSquare / 2);
             for (int i = 0; i < boardTotalCols; i++)
             {
-                x = xStart + (i * GlobalConstants.CharactersPerRowPerBoardSquare) + borderPadding / 2;
+                x = xStart + (i * GlobalConstants.CharactersPerRowPerBoardSquare) 
+                    + GlobalConstants.BoardPadding / 2;
 
                 // top row
                 y = startY + 1;
@@ -109,7 +100,8 @@
             int yStart = startY + (GlobalConstants.CharactersPerRowPerBoardSquare / 2);
             for (int i = 0; i < boardTotalRows; i++)
             {
-                y = yStart + (i * GlobalConstants.CharactersPerColPerBoardSquare) + borderPadding / 2;
+                y = yStart + (i * GlobalConstants.CharactersPerColPerBoardSquare) 
+                    + GlobalConstants.BoardPadding / 2;
 
                 // left column
                 x = startX + 1;

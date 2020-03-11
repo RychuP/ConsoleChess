@@ -5,7 +5,7 @@
     using System.Collections.Generic;
 
     // Libraries
-    using Console = SadConsole.Console;
+    using SadConsole;
 
     // Chess
     using Board;
@@ -28,14 +28,16 @@
         readonly IRenderer renderer;
         readonly IInputProvider input;
         readonly IBoard board;
+        readonly IScoreBoard scoreBoard;
         IList<IPlayer> players;
         int currentPlayerIndex;
 
 
-        public StandardTwoPlayerEngine(Console container)
+        public StandardTwoPlayerEngine(ContainerConsole container)
         {
             movementStrategy = new NormalMovementStrategy();
             renderer = new ConsoleRenderer(container);
+            scoreBoard = new ScoreBoard(container);
             input = new ConsoleInputProvider();
             board = new Board();
         }
@@ -54,12 +56,13 @@
             // TODO: BUG: if players are changed - board is reversed
             players = new List<IPlayer> 
             {
-                new Player("Gosho", ChessColor.Black),
-                new Player("Pesho", ChessColor.White)
-            }; // this.input.GetPlayers(GlobalConstants.StandardGameNumberOfPlayers);
+                new Player("Black", ChessColor.Black),
+                new Player("White", ChessColor.White)
+            }; // input.GetPlayers(GlobalConstants.StandardGameNumberOfPlayers);
 
             SetFirstPlayerIndex();
             gameInitializationStrategy.Initialize(players, board);
+            scoreBoard.Initialize(players);
             renderer.RenderBoard(board);
         }
 
@@ -70,19 +73,19 @@
                 IFigure figure = null;
                 try
                 {
-                    var player = this.GetNextPlayer();
-                    var move = this.input.GetNextPlayerMove(player);
+                    var player = GetNextPlayer();
+                    var move = input.GetNextPlayerMove(player);
                     var from = move.From;
                     var to = move.To;
-                    figure = this.board.GetFigureAtPosition(from);
-                    this.CheckIfPlayerOwnsFigure(player, figure, from);
-                    this.CheckIfToPositionIsEmpty(figure, to);
+                    figure = board.GetFigureAtPosition(from);
+                    CheckIfPlayerOwnsFigure(player, figure, from);
+                    CheckIfToPositionIsEmpty(figure, to);
 
-                    var availableMovements = figure.Move(this.movementStrategy);
-                    this.ValidateMovements(figure, availableMovements, move);
+                    var availableMovements = figure.Move(movementStrategy);
+                    ValidateMovements(figure, availableMovements, move);
 
-                    this.board.MoveFigureAtPosition(figure, from, to);
-                    this.renderer.RenderBoard(this.board);
+                    board.MoveFigureAtPosition(figure, from, to);
+                    renderer.RenderBoard(board);
 
                     // TODO: On every move check if we are in check
                     // TODO: Check pawn on last row
@@ -93,8 +96,8 @@
                 }
                 catch (Exception ex)
                 {
-                    this.currentPlayerIndex--;
-                    this.renderer.PrintErrorMessage(string.Format(ex.Message, figure.GetType().Name));
+                    currentPlayerIndex--;
+                    renderer.PrintErrorMessage(string.Format(ex.Message, figure.GetType().Name));
                 }
             }
         }
@@ -112,7 +115,7 @@
             {
                 try
                 {
-                    movement.ValidateMove(figure, this.board, move);
+                    movement.ValidateMove(figure, board, move);
                     validMoveFound = true;
                     break;
                 }
@@ -130,11 +133,11 @@
 
         private void SetFirstPlayerIndex()
         {
-            for (int i = 0; i < this.players.Count; i++)
+            for (int i = 0; i < players.Count; i++)
             {
-                if (this.players[i].Color == ChessColor.White)
+                if (players[i].Color == ChessColor.White)
                 {
-                    this.currentPlayerIndex = i - 1;
+                    currentPlayerIndex = i - 1;
                     return;
                 }
             }
@@ -142,13 +145,13 @@
 
         private IPlayer GetNextPlayer()
         {
-            this.currentPlayerIndex++;
-            if (this.currentPlayerIndex >= this.players.Count)
+            currentPlayerIndex++;
+            if (currentPlayerIndex >= players.Count)
             {
-                this.currentPlayerIndex = 0;
+                currentPlayerIndex = 0;
             }
 
-            return this.players[this.currentPlayerIndex];
+            return players[currentPlayerIndex];
         }
 
         private void CheckIfPlayerOwnsFigure(IPlayer player, IFigure figure, Position from)
@@ -166,7 +169,7 @@
 
         private void CheckIfToPositionIsEmpty(IFigure figure, Position to)
         {
-            var figureAtPosition = this.board.GetFigureAtPosition(to);
+            var figureAtPosition = board.GetFigureAtPosition(to);
             if (figureAtPosition != null && figureAtPosition.Color == figure.Color)
             {
                 throw new InvalidOperationException(string.Format("You already have a figure at {0}{1}!", to.Col, to.Row));

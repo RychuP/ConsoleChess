@@ -1,7 +1,21 @@
 ﻿namespace ConsoleChess.Common
 {
-    public class GlobalConstants
+    public static class GlobalConstants
     {
+        const int standardFontHeight = 16;
+        const int chessFontHeight = 8;
+
+        public const int BoardHeight = StandardGameTotalBoardRows
+            * CharactersPerRowPerBoardSquare + BoardPadding;
+
+        public const int BoardWidth = StandardGameTotalBoardCols
+            * CharactersPerColPerBoardSquare + BoardPadding;
+
+        public const int WindowHeight = BoardHeight 
+            / (standardFontHeight / chessFontHeight);
+
+        public const int UserInterfaceWidth = 40;
+
         public const int CharactersPerRowPerBoardSquare = 9;
         public const int CharactersPerColPerBoardSquare = 9;
 
@@ -14,6 +28,8 @@
 
         public const char MinimumColumnValueOnBoard = 'a';
         public const char MaximumColumnValueOnBoard = 'h';
+
+        public const int BoardPadding = 4;
 
         public const string EmptyString = "";
     }
