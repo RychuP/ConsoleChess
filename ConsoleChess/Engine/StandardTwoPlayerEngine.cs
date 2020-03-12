@@ -6,16 +6,15 @@
 
     // Libraries
     using SadConsole;
+    using Microsoft.Xna.Framework;
 
     // Chess
     using Board;
     using Board.Contracts;
     using Common;
-    using ConsoleChess.InputProviders;
     using ConsoleChess.Renderers;
     using Contracts;
     using Figures.Contracts;
-    using InputProviders.Contracts;
     using Movements.Contracts;
     using Movements.Strategies;
     using Players;
@@ -26,20 +25,21 @@
     {
         readonly IMovementStrategy movementStrategy;
         readonly IRenderer renderer;
-        readonly IInputProvider input;
         readonly IBoard board;
         readonly IScoreBoard scoreBoard;
         IList<IPlayer> players;
-        int currentPlayerIndex;
-
+        int currentPlayerIndex = 1;
+        IList<Position> selectedPositions;
 
         public StandardTwoPlayerEngine(ContainerConsole container)
         {
             movementStrategy = new NormalMovementStrategy();
             renderer = new ConsoleRenderer(container);
+            selectedPositions = new List<Position>();
             scoreBoard = new ScoreBoard(container);
-            input = new ConsoleInputProvider();
             board = new Board();
+
+            renderer.Console.MouseMove += MouseClickOnBoard;
         }
 
         public IEnumerable<IPlayer> Players
@@ -52,54 +52,16 @@
 
         public void Initialize(IGameInitializationStrategy gameInitializationStrategy)
         {
-            // TODO: remove using JustChess.Players and use the input for players
             // TODO: BUG: if players are changed - board is reversed
             players = new List<IPlayer> 
             {
                 new Player("Black", ChessColor.Black),
                 new Player("White", ChessColor.White)
-            }; // input.GetPlayers(GlobalConstants.StandardGameNumberOfPlayers);
+            };
 
-            SetFirstPlayerIndex();
             gameInitializationStrategy.Initialize(players, board);
             scoreBoard.Initialize(players);
             renderer.RenderBoard(board);
-        }
-
-        public void Start()
-        {
-            while (true)
-            {
-                IFigure figure = null;
-                try
-                {
-                    var player = GetNextPlayer();
-                    var move = input.GetNextPlayerMove(player);
-                    var from = move.From;
-                    var to = move.To;
-                    figure = board.GetFigureAtPosition(from);
-                    CheckIfPlayerOwnsFigure(player, figure, from);
-                    CheckIfToPositionIsEmpty(figure, to);
-
-                    var availableMovements = figure.Move(movementStrategy);
-                    ValidateMovements(figure, availableMovements, move);
-
-                    board.MoveFigureAtPosition(figure, from, to);
-                    renderer.RenderBoard(board);
-
-                    // TODO: On every move check if we are in check
-                    // TODO: Check pawn on last row
-                    // TODO: If not castle - move figure (check castle - check if castle is valid, check pawn for An-pasan)
-                    // TODO: If in check - check checkmate
-                    // TODO: If not in check - check draw
-                    // TODO: Continue
-                }
-                catch (Exception ex)
-                {
-                    currentPlayerIndex--;
-                    renderer.PrintErrorMessage(string.Format(ex.Message, figure.GetType().Name));
-                }
-            }
         }
 
         public void WinningConditions()
@@ -131,27 +93,13 @@
             }
         }
 
-        private void SetFirstPlayerIndex()
-        {
-            for (int i = 0; i < players.Count; i++)
-            {
-                if (players[i].Color == ChessColor.White)
-                {
-                    currentPlayerIndex = i - 1;
-                    return;
-                }
-            }
-        }
-
-        private IPlayer GetNextPlayer()
+        private void NextPlayer()
         {
             currentPlayerIndex++;
             if (currentPlayerIndex >= players.Count)
             {
                 currentPlayerIndex = 0;
             }
-
-            return players[currentPlayerIndex];
         }
 
         private void CheckIfPlayerOwnsFigure(IPlayer player, IFigure figure, Position from)
@@ -174,6 +122,91 @@
             {
                 throw new InvalidOperationException(string.Format("You already have a figure at {0}{1}!", to.Col, to.Row));
             }
+        }
+
+        void MouseClickOnBoard(object sender, SadConsole.Input.MouseEventArgs e)
+        {
+            if (e.MouseState.Mouse.LeftClicked)
+            {
+                Point mousePosition = e.MouseState.CellPosition;
+                int column = (mousePosition.X - GlobalConstants.BorderWidth - 1)
+                    / GlobalConstants.CharactersPerColPerBoardSquare;
+                // prevent invalid coordinates
+                if (column >= board.TotalCols) column = board.TotalCols - 1;
+                char chessCoordX = (char)('a' + column);
+
+                int row = (mousePosition.Y - GlobalConstants.BorderWidth - 1)
+                    / GlobalConstants.CharactersPerRowPerBoardSquare;
+                // prevent invalid coordinates
+                if (row >= board.TotalRows) row = board.TotalRows - 1;
+                int chessCoordY = board.TotalRows - row;
+
+                // get objects
+                Position position = new Position(chessCoordY, chessCoordX);
+                IPlayer player = players[currentPlayerIndex];
+
+                // check selected positions
+                switch (selectedPositions.Count)
+                {
+                    case 0:
+                        IFigure figure = board.GetFigureAtPosition(position);
+                        try
+                        {
+                            CheckIfPlayerOwnsFigure(player, figure, position);
+                        }
+                        catch (Exception f)
+                        {
+                            ResetMoves();
+                            break;
+                        }
+                        renderer.HighlightPosition(position, Color.Green);
+                        selectedPositions.Add(position);
+                        break;
+
+                    case 1:
+                        Position from = selectedPositions[0];
+                        Position to = position;
+                        figure = board.GetFigureAtPosition(from);
+                        try
+                        {
+                            CheckIfToPositionIsEmpty(figure, position);
+                            var availableMovements = figure.Move(movementStrategy);
+                            Move move = new Move(from, to);
+                            ValidateMovements(figure, availableMovements, move);
+                            board.MoveFigureAtPosition(figure, from, to);
+                            renderer.RenderBoard(board);
+                            ResetMoves();
+                            NextPlayer();
+                            break;
+
+                            // TODO: On every move check if we are in check
+                            // TODO: Check pawn on last row
+                            // TODO: If not castle - move figure 
+                            // (check castle - check if castle is valid, check pawn for An-pasan)
+                            // TODO: If in check - check checkmate
+                            // TODO: If not in check - check draw
+                            // TODO: display error messages
+                        }
+                        catch (Exception f)
+                        {
+                            ResetMoves();
+                            break;
+                        }
+
+                    default:
+                        ResetMoves();
+                        break;
+                }
+            }
+        }
+
+        void ResetMoves()
+        {
+            foreach (var position in selectedPositions)
+            {
+                renderer.RemoveHighlight(position);
+            }
+            selectedPositions.Clear();
         }
     }
 }

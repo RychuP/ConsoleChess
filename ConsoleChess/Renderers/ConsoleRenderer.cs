@@ -16,18 +16,20 @@
 
     public class ConsoleRenderer : IRenderer
     {
-        readonly Console boardConsole;
         readonly Color DarkSquareColor = Color.DarkGray;
         readonly Color LightSquareColor = Color.Gray;
+        int boardTotalRows, boardTotalCols;
+
+        public Console Console { get; private set; }
 
         public ConsoleRenderer(ContainerConsole parent)
         {
             // load font
-            var fontMaster = SadConsole.Global.LoadFont("Fonts/chess.font");
-            var normalSizedFont = fontMaster.GetFont(SadConsole.Font.FontSizes.One);
+            var fontMaster = Global.LoadFont("Fonts/chess.font");
+            var normalSizedFont = fontMaster.GetFont(Font.FontSizes.One);
 
             // create board console
-            boardConsole = new Console(GlobalConstants.BoardWidth, GlobalConstants.BoardHeight, normalSizedFont)
+            Console = new Console(GlobalConstants.BoardWidth, GlobalConstants.BoardHeight, normalSizedFont)
             {
                 Parent = parent
             };
@@ -40,18 +42,20 @@
 
         public void RenderBoard(IBoard board)
         {
-            int startX = 0, startY = 0, currentX, currentY;
-
-            PrintBorder(startX, startY, board.TotalRows, board.TotalCols);
+            int currentX, currentY;
+            boardTotalRows = board.TotalRows;
+            boardTotalCols = board.TotalCols;
+            PrintBorder();
 
             int counter = 1;
             for (int y = 0; y < board.TotalRows; y++)
             {
                 for (int x = 0; x < board.TotalCols; x++)
                 {
-                    int offset = GlobalConstants.BoardPadding / 2;
-                    currentX = startX + (x * GlobalConstants.CharactersPerColPerBoardSquare) + offset;
-                    currentY = startY + (y * GlobalConstants.CharactersPerRowPerBoardSquare) + offset;
+                    currentX = x * GlobalConstants.CharactersPerColPerBoardSquare 
+                        + GlobalConstants.BorderWidth;
+                    currentY = y * GlobalConstants.CharactersPerRowPerBoardSquare 
+                        + GlobalConstants.BorderWidth;
 
                     Color backgroundColor = (counter % 2 == 0) ? LightSquareColor : DarkSquareColor;
 
@@ -66,50 +70,87 @@
             }
         }
 
+        public void RemoveHighlight(Position position)
+        {
+            int counter = position.Row + position.Col;
+            Color color = (counter % 2 == 0) ? LightSquareColor : DarkSquareColor;
+            HighlightPosition(position, color);
+        }
+
+        public void HighlightPosition(Position position, Color color)
+        {
+            int boardPosX = (position.Col - 'a')
+                * GlobalConstants.CharactersPerColPerBoardSquare
+                + GlobalConstants.BorderWidth;
+            int boardPosY = (boardTotalRows - position.Row)
+                * GlobalConstants.CharactersPerRowPerBoardSquare
+                + GlobalConstants.BorderWidth;
+
+            var rect = new Rectangle(boardPosX, boardPosY, 
+                GlobalConstants.CharactersPerColPerBoardSquare, 
+                GlobalConstants.CharactersPerRowPerBoardSquare);
+            var cell = new Cell(Color.White, color, 0);
+            Console.DrawBox(rect, cell);
+        }
+
         public void PrintErrorMessage(string errorMessage)
         {
 
         }
 
-        void PrintBorder(int startX, int startY, int boardTotalRows, int boardTotalCols)
+        void PrintBorder()
         {
+            // check if there is space for border
+            #pragma warning disable CS0162 // ignore warning
+            if (GlobalConstants.BorderWidth <= 0) return;
+            #pragma warning restore CS0162
+
             int x, y;
 
             // border
             var rect = new Rectangle(0, 0, GlobalConstants.BoardWidth, GlobalConstants.BoardHeight);
             var cell = new Cell(Color.White, DarkSquareColor, 0);
-            boardConsole.DrawBox(rect, cell);
+            Console.DrawBox(rect, cell);
 
-            // column letters above and below board
-            int xStart = startX + (GlobalConstants.CharactersPerColPerBoardSquare / 2);
+            // check if there is space for column and row annotations
+            #pragma warning disable CS0162 // ignore warning
+            if (GlobalConstants.BorderWidth < 2) return;
+            #pragma warning restore CS0162
+
+            // column annotations above and below board
+            int xStart = GlobalConstants.CharactersPerColPerBoardSquare / 2;
             for (int i = 0; i < boardTotalCols; i++)
             {
                 x = xStart + (i * GlobalConstants.CharactersPerRowPerBoardSquare) 
-                    + GlobalConstants.BoardPadding / 2;
+                    + GlobalConstants.BorderWidth;
 
                 // top row
-                y = startY + 1;
-                boardConsole.SetGlyph(x, y, (char)('A' + i));
+                y = GlobalConstants.BorderWidth / 2;
+                Console.SetGlyph(x, y, (char)('A' + i));
 
                 // bottom row
-                y += boardTotalRows * GlobalConstants.CharactersPerRowPerBoardSquare + 1;
-                boardConsole.SetGlyph(x, y, (char)('A' + i));
+                y += GlobalConstants.BorderWidth
+                    - (GlobalConstants.BorderWidth % 2 == 0 ? 1 : 0)
+                    + boardTotalRows * GlobalConstants.CharactersPerRowPerBoardSquare;
+                Console.SetGlyph(x, y, (char)('A' + i));
             }
 
             // row numbers on the left and right of the board
-            int yStart = startY + (GlobalConstants.CharactersPerRowPerBoardSquare / 2);
+            int yStart = GlobalConstants.CharactersPerRowPerBoardSquare / 2;
             for (int i = 0; i < boardTotalRows; i++)
             {
                 y = yStart + (i * GlobalConstants.CharactersPerColPerBoardSquare) 
-                    + GlobalConstants.BoardPadding / 2;
+                    + GlobalConstants.BorderWidth;
 
                 // left column
-                x = startX + 1;
-                boardConsole.SetGlyph(x, y, (char)('0' + boardTotalRows - i));
+                x = GlobalConstants.BorderWidth / 2;
+                Console.SetGlyph(x, y, (char)('0' + boardTotalRows - i));
 
                 // right column
-                x += boardTotalCols * GlobalConstants.CharactersPerColPerBoardSquare + 1;
-                boardConsole.SetGlyph(x, y, (char)('0' + boardTotalRows - i));
+                x += GlobalConstants.BorderWidth
+                    - (GlobalConstants.BorderWidth % 2 == 0 ? 1 : 0)
+                    + boardTotalCols * GlobalConstants.CharactersPerColPerBoardSquare;
+                Console.SetGlyph(x, y, (char)('0' + boardTotalRows - i));
             }
         }
 
@@ -118,7 +159,7 @@
             for (int y = 0; y < GlobalConstants.CharactersPerRowPerBoardSquare; y++)
             {
                 char emptySpace = (char) 0;
-                boardConsole.Print(currentX, currentY + y, 
+                Console.Print(currentX, currentY + y, 
                     new string(emptySpace, GlobalConstants.CharactersPerColPerBoardSquare),
                     Color.White, backgroundColor);
             }
@@ -136,7 +177,7 @@
             {
                 for (int x = 0; x < figure.Pattern.GetLength(1); x++)
                 {
-                    boardConsole.SetGlyph(currentX + x, currentY + y, figure.Pattern[y, x],
+                    Console.SetGlyph(currentX + x, currentY + y, figure.Pattern[y, x],
                         figure.Color.ToConsoleColor(), backgroundColor);
                 }
             }

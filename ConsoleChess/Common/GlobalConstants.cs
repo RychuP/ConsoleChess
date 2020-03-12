@@ -4,12 +4,13 @@
     {
         const int standardFontHeight = 16;
         const int chessFontHeight = 8;
+        public const int BorderWidth = 2;
 
         public const int BoardHeight = StandardGameTotalBoardRows
-            * CharactersPerRowPerBoardSquare + BoardPadding;
+            * CharactersPerRowPerBoardSquare + BorderWidth * 2;
 
         public const int BoardWidth = StandardGameTotalBoardCols
-            * CharactersPerColPerBoardSquare + BoardPadding;
+            * CharactersPerColPerBoardSquare + BorderWidth * 2;
 
         public const int WindowHeight = BoardHeight 
             / (standardFontHeight / chessFontHeight);
@@ -28,8 +29,6 @@
 
         public const char MinimumColumnValueOnBoard = 'a';
         public const char MaximumColumnValueOnBoard = 'h';
-
-        public const int BoardPadding = 4;
 
         public const string EmptyString = "";
     }

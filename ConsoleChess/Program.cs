@@ -39,8 +39,6 @@
             // initialize players, pieces and the board
             var gameInitializationStrategy = new StandardStartGameInitializationStrategy();
             chessEngine.Initialize(gameInitializationStrategy);
-
-            // chessEngine.Start();
         }
     }
 }

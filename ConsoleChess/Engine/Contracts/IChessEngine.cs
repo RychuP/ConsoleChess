@@ -10,8 +10,6 @@
 
         void Initialize(IGameInitializationStrategy gameInitializationStrategy);
 
-        void Start();
-
         void WinningConditions();
     }
 }
