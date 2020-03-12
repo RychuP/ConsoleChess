@@ -1,7 +1,6 @@
 ﻿namespace ConsoleChess.Renderers
 {
     using System;
-    using System.Linq;
     using System.Collections.Generic;
 
     using SadConsole;
@@ -11,14 +10,18 @@
     using Renderers.Contracts;
     using Players.Contracts;
     using Common;
-    using Players;
 
     class ScoreBoard : IScoreBoard
     {
         const int headerHeight = 3;
+        const int headerBottomMargin = 1;
+
         readonly ContainerConsole scoreBoardContainer;
         Dictionary<IPlayer, IList<Move>> moveLists;
         Dictionary<IPlayer, Console> scoreConsoles;
+
+        Color active = Color.Silver;
+        Color passive = Color.SlateGray;
 
         public ScoreBoard(ContainerConsole parent)
         {
@@ -69,31 +72,40 @@
             PrintMoveList(nextPlayer, true);
         }
 
+        public void RecordMove(IPlayer currentPlayer, Position? position = null)
+        {
+            var console = scoreConsoles[currentPlayer];
+            var moves = moveLists[currentPlayer];
+            int row = headerHeight + headerBottomMargin + moves.Count;
+            string move = (position.HasValue) ? $"{position.Value}" : "..";
+            console.Print(0, row, $"{move} - ..".Align(HorizontalAlignment.Center, console.Width));
+        }
+
         void PrintMoveList(IPlayer player, bool currentlyActive = false)
         {
+            Color fontColor = currentlyActive ? active : passive;
+            int row = headerHeight + headerBottomMargin;
             var console = scoreConsoles[player];
             var moves = moveLists[player];
 
             PrintPlayerName(console, player.Name, currentlyActive);
 
-            int headerBottomMargin = 1;
-            int row = headerHeight + headerBottomMargin;
             for (int i = 0; i < moves.Count; i++)
             {
                 string move = moves[i].ToString();
-                console.Print(0, row++, move.Align(HorizontalAlignment.Center, console.Width));
+                console.Print(0, row++, move.Align(HorizontalAlignment.Center, console.Width), fontColor);
             }
 
             if (currentlyActive)
             {
-                console.Print(0, row, ".. - ..".Align(HorizontalAlignment.Center, console.Width));
+                RecordMove(player);
             }
         }
 
         void PrintPlayerName(Console console, string name, bool doubleBorder = false)
         {
             int width = console.Width;
-            Color borderColor = Color.Silver;
+            Color borderColor = doubleBorder ? active : passive;
             byte topLeftCorner = 218,
                 topRightCorner = 191,
                 bottomLeftCorner = 192,

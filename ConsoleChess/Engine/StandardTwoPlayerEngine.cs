@@ -161,6 +161,7 @@
                         }
                         renderer.HighlightPosition(position, Color.Green);
                         selectedPositions.Add(position);
+                        scoreBoard.RecordMove(player, position);
                         break;
 
                     case 1:
@@ -187,6 +188,7 @@
                         }
                         catch (Exception f)
                         {
+                            scoreBoard.RecordMove(player);
                             ResetMoves();
                             break;
                         }
