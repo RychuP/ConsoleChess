@@ -4,6 +4,7 @@
     using System.Collections.Generic;
 
     using Common;
+    using Figures;
     using Contracts;
     using Figures.Contracts;
 

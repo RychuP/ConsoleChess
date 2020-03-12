@@ -1,7 +1,8 @@
 ﻿namespace ConsoleChess.Board.Contracts
 {
-    using ConsoleChess.Common;
-    using ConsoleChess.Figures.Contracts;
+    using Common;
+    using Figures.Contracts;
+    using System.Collections.Generic;
 
     public interface IBoard
     {
@@ -16,5 +17,9 @@
         IFigure GetFigureAtPosition(Position position);
 
         void MoveFigureAtPosition(IFigure figure, Position from, Position to);
+
+        Position GetKingsPosition(ChessColor color);
+
+        IDictionary<IFigure, Position> GetOppositeArmy(ChessColor color);
     }
 }

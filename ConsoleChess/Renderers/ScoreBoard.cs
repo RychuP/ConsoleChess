@@ -63,6 +63,7 @@
             }
         }
 
+        // puts the move on the move list and switches active player on the score board
         public void RecordMove(Move move, IPlayer currentPlayer, IPlayer nextPlayer)
         {
             // record move
@@ -73,6 +74,7 @@
             PrintMoveList(nextPlayer, true);
         }
 
+        // displays dotted placeholder for the following move
         public void RecordMove(IPlayer currentPlayer, Position? position = null)
         {
             var console = scoreConsoles[currentPlayer];

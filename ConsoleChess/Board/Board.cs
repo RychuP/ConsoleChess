@@ -1,8 +1,12 @@
 ﻿namespace ConsoleChess.Board
 {
+    using System;
+
     using Contracts;
     using Common;
     using Figures.Contracts;
+    using Figures;
+    using System.Collections.Generic;
 
     public class Board : IBoard
     {
@@ -58,12 +62,54 @@
             board[arrToRow, arrToCol] = figure;
         }
 
-        private int GetArrayRow(int chessRow)
+        public Position GetKingsPosition(ChessColor color)
+        {
+            int rowCount = board.GetLength(0);
+            int colCount = board.GetLength(1);
+
+            for (int y = 0; y < rowCount; y++)
+            {
+                for (int x = 0; x < colCount; x++)
+                {
+                    var figure = board[y, x];
+                    if (figure is King && figure.Color.Equals(color))
+                    {
+                        return Position.FromArrayCoordinates(y, x, TotalRows);
+                    }
+                }
+            }
+
+            throw new Exception("Unable to find the king figure with color: " + color);
+        }
+
+        public IDictionary<IFigure, Position> GetOppositeArmy(ChessColor color)
+        {
+            int rowCount = board.GetLength(0);
+            int colCount = board.GetLength(1);
+            var army = new Dictionary<IFigure, Position>();
+
+            for (int y = 0; y < rowCount; y++)
+            {
+                for (int x = 0; x < colCount; x++)
+                {
+                    var figure = board[y, x];
+                    if (figure != null && figure.Color.Equals(color))
+                    {
+                        var position = Position.FromArrayCoordinates(y, x, TotalRows);
+                        army.Add(figure, position);
+                    }
+                }
+            }
+
+            return army;
+        }
+
+        int GetArrayRow(int chessRow)
         {
             return TotalRows - chessRow;
         }
 
-        private int GetArrayCol(char chessCol)
+        int GetArrayCol(char chessCol)
         {
             return chessCol - 'a';
         }

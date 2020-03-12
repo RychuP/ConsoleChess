@@ -28,9 +28,9 @@
         readonly IRenderer renderer;
         readonly IBoard board;
         readonly IScoreBoard scoreBoard;
+        readonly IList<Position> selectedPositions;
         IList<IPlayer> players;
         int currentPlayerIndex = 1;
-        IList<Position> selectedPositions;
 
         public StandardTwoPlayerEngine(ContainerConsole container)
         {
@@ -40,6 +40,7 @@
             scoreBoard = new ScoreBoard(container);
             board = new Board();
 
+            // main event that drives the game
             renderer.Console.MouseMove += MouseClickOnBoard;
         }
 
@@ -125,20 +126,35 @@
             }
         }
 
-        void CheckIfKingIsInCheck(King king)
+        bool KingIsInCheck(ChessColor color, Position kingsPosition)
         {
+            var oppositeColor = color == ChessColor.White ? ChessColor.Black : ChessColor.White;
+            IDictionary<IFigure, Position> oppositeArmy = board.GetOppositeArmy(oppositeColor);
 
-            // check for attacking pawns
-            if (king.Color == ChessColor.White)
+            foreach (var chessPiece in oppositeArmy)
             {
-
+                var figure = chessPiece.Key;
+                var position = chessPiece.Value;
+                try
+                {
+                    var move = new Move(position, kingsPosition);
+                    var availableMovements = figure.Move(movementStrategy);
+                    ValidateMovements(figure, availableMovements, move);
+                    return true;
+                }
+                catch
+                {
+                    continue;
+                }
             }
+            return false;
         }
 
         void MouseClickOnBoard(object sender, SadConsole.Input.MouseEventArgs e)
         {
             if (e.MouseState.Mouse.LeftClicked)
             {
+                // convert mose x, y into chess coors of the board square
                 Point mousePosition = e.MouseState.CellPosition;
                 int column = (mousePosition.X - GlobalConstants.BorderWidth - 1)
                     / GlobalConstants.CharactersPerColPerBoardSquare;
@@ -152,7 +168,7 @@
                 if (row >= board.TotalRows) row = board.TotalRows - 1;
                 int chessCoordY = board.TotalRows - row;
 
-                // get objects
+                // get objects relating to the selected board square
                 Position position = new Position(chessCoordY, chessCoordX);
                 IPlayer player = players[currentPlayerIndex];
                 IFigure figure, capturedFigure;
@@ -166,7 +182,7 @@
                         {
                             CheckIfPlayerOwnsFigure(player, figure, position);
                         }
-                        catch (Exception f)
+                        catch
                         {
                             ResetMoves();
                             break;
@@ -182,16 +198,25 @@
                         Move move = new Move(from, to);
                         figure = board.GetFigureAtPosition(from);
                         capturedFigure = board.GetFigureAtPosition(to);
-
+                        
                         try
                         {
-                            // engine update with a risk of exceptions
+                            // engine update with a risk of rain (exceptions)
                             CheckIfToPositionIsEmpty(figure, position);
                             var availableMovements = figure.Move(movementStrategy);
                             ValidateMovements(figure, availableMovements, move);
                             board.MoveFigureAtPosition(figure, from, to);
 
-                            // TODO: On every move check if we are in check
+                            // revert the move if king is in checked position
+                            var kingsPosition = board.GetKingsPosition(player.Color);
+                            if (KingIsInCheck(player.Color, kingsPosition)) 
+                            {
+                                board.MoveFigureAtPosition(figure, to, from);
+                                scoreBoard.RecordMove(player);
+                                ResetMoves();
+                                break;
+                            }
+                            
                             // TODO: Check pawn on last row
                             // TODO: If not castle - move figure 
                             // (check castle - check if castle is valid, check pawn for An-pasan)
@@ -199,7 +224,7 @@
                             // TODO: If not in check - check draw
                             // TODO: display error messages
                         }
-                        catch (Exception f)
+                        catch
                         {
                             scoreBoard.RecordMove(player);
                             ResetMoves();
@@ -227,6 +252,7 @@
             }
         }
 
+        // resets the temporary list of clicked positions on the board
         void ResetMoves()
         {
             foreach (var position in selectedPositions)
