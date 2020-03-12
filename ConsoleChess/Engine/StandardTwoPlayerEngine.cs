@@ -20,6 +20,7 @@
     using Players;
     using Players.Contracts;
     using Renderers.Contracts;
+    using Figures;
 
     public class StandardTwoPlayerEngine : IChessEngine
     {
@@ -69,7 +70,7 @@
             throw new NotImplementedException();
         }
 
-        private void ValidateMovements(IFigure figure, IEnumerable<IMovement> availableMovements, Move move)
+        void ValidateMovements(IFigure figure, IEnumerable<IMovement> availableMovements, Move move)
         {
             var validMoveFound = false;
             var foundException = new Exception();
@@ -93,7 +94,7 @@
             }
         }
 
-        private void NextPlayer()
+        void NextPlayer()
         {
             currentPlayerIndex++;
             if (currentPlayerIndex >= players.Count)
@@ -102,7 +103,7 @@
             }
         }
 
-        private void CheckIfPlayerOwnsFigure(IPlayer player, IFigure figure, Position from)
+        void CheckIfPlayerOwnsFigure(IPlayer player, IFigure figure, Position from)
         {
             if (figure == null)
             {
@@ -115,12 +116,22 @@
             }
         }
 
-        private void CheckIfToPositionIsEmpty(IFigure figure, Position to)
+        void CheckIfToPositionIsEmpty(IFigure figure, Position to)
         {
             var figureAtPosition = board.GetFigureAtPosition(to);
             if (figureAtPosition != null && figureAtPosition.Color == figure.Color)
             {
                 throw new InvalidOperationException(string.Format("You already have a figure at {0}{1}!", to.Col, to.Row));
+            }
+        }
+
+        void CheckIfKingIsInCheck(King king)
+        {
+
+            // check for attacking pawns
+            if (king.Color == ChessColor.White)
+            {
+
             }
         }
 

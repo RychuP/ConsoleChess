@@ -116,7 +116,8 @@
             foreach (var figure in trophies)
             {
                 string type = figure.GetType().ToString();
-                char figureLetter = type.Substring(type.LastIndexOf('.') + 1)[0];
+                type = type.Substring(type.LastIndexOf('.') + 1);
+                char figureLetter = type == "Knight" ? 'N' : type[0];
                 console.SetGlyph(x, row++, figureLetter, fontColor);
             }
         }

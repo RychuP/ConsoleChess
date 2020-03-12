@@ -43,7 +43,7 @@
 
         public IList<IMovement> GetMovements(string figure)
         {
-            return this.movements[figure];
+            return movements[figure];
         }
     }
 }
