@@ -144,12 +144,13 @@
                 // get objects
                 Position position = new Position(chessCoordY, chessCoordX);
                 IPlayer player = players[currentPlayerIndex];
+                IFigure figure, capturedFigure;
 
                 // check selected positions
                 switch (selectedPositions.Count)
                 {
                     case 0:
-                        IFigure figure = board.GetFigureAtPosition(position);
+                        figure = board.GetFigureAtPosition(position);
                         try
                         {
                             CheckIfPlayerOwnsFigure(player, figure, position);
@@ -169,7 +170,8 @@
                         Position to = position;
                         Move move = new Move(from, to);
                         figure = board.GetFigureAtPosition(from);
-                        
+                        capturedFigure = board.GetFigureAtPosition(to);
+
                         try
                         {
                             // engine update with a risk of exceptions
@@ -195,6 +197,10 @@
 
                         // engine update
                         renderer.RenderBoard(board);
+                        if (capturedFigure != null)
+                        {
+                            player.AddTrophy(capturedFigure);
+                        }
                         ResetMoves();
                         NextPlayer();
 

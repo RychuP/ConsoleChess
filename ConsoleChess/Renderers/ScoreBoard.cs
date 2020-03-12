@@ -9,6 +9,7 @@
 
     using Renderers.Contracts;
     using Players.Contracts;
+    using Figures.Contracts;
     using Common;
 
     class ScoreBoard : IScoreBoard
@@ -17,11 +18,11 @@
         const int headerBottomMargin = 1;
 
         readonly ContainerConsole scoreBoardContainer;
-        Dictionary<IPlayer, IList<Move>> moveLists;
-        Dictionary<IPlayer, Console> scoreConsoles;
+        readonly Dictionary<IPlayer, IList<Move>> moveLists;
+        readonly Dictionary<IPlayer, Console> scoreConsoles;
 
-        Color active = Color.Silver;
-        Color passive = Color.SlateGray;
+        Color active = Color.White;
+        Color passive = Color.DarkGray;
 
         public ScoreBoard(ContainerConsole parent)
         {
@@ -87,25 +88,42 @@
             int row = headerHeight + headerBottomMargin;
             var console = scoreConsoles[player];
             var moves = moveLists[player];
+            bool displayTrophiesOnLeftSide = player.Color == ChessColor.Black;
 
-            PrintPlayerName(console, player.Name, currentlyActive);
+            // display player name at the top
+            PrintPlayerName(console, player.Name, fontColor, currentlyActive);
 
+            // display the column of all recorded moves
             for (int i = 0; i < moves.Count; i++)
             {
                 string move = moves[i].ToString();
-                console.Print(0, row++, move.Align(HorizontalAlignment.Center, console.Width), fontColor);
+                console.Print(0, row + i, move.Align(HorizontalAlignment.Center, console.Width), fontColor);
             }
 
+            // display a placeholder for the current player's next move
             if (currentlyActive)
             {
                 RecordMove(player);
             }
+
+            // display all captured figures
+            PrintPlayerTropies(console, player.Trophies, fontColor, row, displayTrophiesOnLeftSide);
         }
 
-        void PrintPlayerName(Console console, string name, bool doubleBorder = false)
+        void PrintPlayerTropies(Console console, IList<IFigure> trophies, Color fontColor, int row, bool displayTrophiesOnLeftSide)
+        {
+            int x = displayTrophiesOnLeftSide ? 1 : console.Width - 2;
+            foreach (var figure in trophies)
+            {
+                string type = figure.GetType().ToString();
+                char figureLetter = type.Substring(type.LastIndexOf('.') + 1)[0];
+                console.SetGlyph(x, row++, figureLetter, fontColor);
+            }
+        }
+
+        void PrintPlayerName(Console console, string name, Color borderColor, bool doubleBorder)
         {
             int width = console.Width;
-            Color borderColor = doubleBorder ? active : passive;
             byte topLeftCorner = 218,
                 topRightCorner = 191,
                 bottomLeftCorner = 192,

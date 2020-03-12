@@ -2,6 +2,7 @@
 {
     using Common;
     using Figures.Contracts;
+    using System.Collections.Generic;
 
     public interface IPlayer
     {
@@ -12,5 +13,11 @@
         void AddFigure(IFigure figure);
 
         void RemoveFigure(IFigure figure);
+
+        IList<IFigure> Trophies { get; }
+
+        void AddTrophy(IFigure figure);
+
+        void ResetTrophies();
     }
 }
