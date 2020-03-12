@@ -2,15 +2,19 @@
 {
     public struct Move
     {
-        public Move(Position from, Position to)
-            : this()
+        public Move(Position from, Position to) : this()
         {
-            this.From = from;
-            this.To = to;
+            From = from;
+            To = to;
         }
 
         public Position From { get; private set; }
 
         public Position To { get; private set; }
+
+        public override string ToString()
+        {
+            return $"{From} - {To}";
+        }
     }
 }

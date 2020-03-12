@@ -7,7 +7,7 @@ namespace ConsoleChess.Renderers.Contracts
 {
     public interface IScoreBoard
     {
-        void RecordMove(Move move, Player player);
+        void RecordMove(Move move, IPlayer player, IPlayer nextPlayer);
 
         void Initialize(IList<IPlayer> players);
     }

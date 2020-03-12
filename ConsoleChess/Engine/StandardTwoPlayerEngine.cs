@@ -166,18 +166,16 @@
                     case 1:
                         Position from = selectedPositions[0];
                         Position to = position;
+                        Move move = new Move(from, to);
                         figure = board.GetFigureAtPosition(from);
+                        
                         try
                         {
+                            // engine update with a risk of exceptions
                             CheckIfToPositionIsEmpty(figure, position);
                             var availableMovements = figure.Move(movementStrategy);
-                            Move move = new Move(from, to);
                             ValidateMovements(figure, availableMovements, move);
                             board.MoveFigureAtPosition(figure, from, to);
-                            renderer.RenderBoard(board);
-                            ResetMoves();
-                            NextPlayer();
-                            break;
 
                             // TODO: On every move check if we are in check
                             // TODO: Check pawn on last row
@@ -192,6 +190,16 @@
                             ResetMoves();
                             break;
                         }
+
+                        // engine update
+                        renderer.RenderBoard(board);
+                        ResetMoves();
+                        NextPlayer();
+
+                        // score board update
+                        var nextPlayer = players[currentPlayerIndex];
+                        scoreBoard.RecordMove(move, player, nextPlayer);
+                        break;
 
                     default:
                         ResetMoves();

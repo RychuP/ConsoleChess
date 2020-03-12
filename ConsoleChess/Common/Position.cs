@@ -4,11 +4,10 @@
 
     public struct Position
     {
-        public Position(int row, char col)
-            : this()
+        public Position(int row, char col) : this()
         {
-            this.Row = row;
-            this.Col = col;
+            Row = row;
+            Col = col;
         }
 
         public int Row { get; private set; }
@@ -40,6 +39,11 @@
             {
                 throw new IndexOutOfRangeException("Selected column position on the board is not valid!");
             }
+        }
+
+        public override string ToString()
+        {
+            return $"{Col}{Row}";
         }
     }
 }
