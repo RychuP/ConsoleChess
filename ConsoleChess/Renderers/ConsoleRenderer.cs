@@ -2,22 +2,26 @@
 {
     // .NET
     using System;
+    using System.Collections.Generic;
 
     // Libraries
     using SadConsole;
+    using SadConsole.Input;
     using Microsoft.Xna.Framework;
     using Console = SadConsole.Console;
 
     // Chess
-    using Board.Contracts;
     using Common;
     using Contracts;
     using Figures.Contracts;
+    using Board.Contracts;
+    using ConsoleChess.Figures;
 
     public class ConsoleRenderer : IRenderer
     {
         readonly Color DarkSquareColor = Color.DarkGray;
         readonly Color LightSquareColor = Color.Gray;
+        readonly Font normalSizedFont;
         int boardTotalRows, boardTotalCols;
 
         public Console Console { get; private set; }
@@ -26,7 +30,7 @@
         {
             // load font
             var fontMaster = Global.LoadFont("Fonts/chess.font");
-            var normalSizedFont = fontMaster.GetFont(Font.FontSizes.One);
+            normalSizedFont = fontMaster.GetFont(Font.FontSizes.One);
 
             // create board console
             Console = new Console(GlobalConstants.BoardWidth, GlobalConstants.BoardHeight, normalSizedFont)
@@ -61,13 +65,54 @@
 
                     var position = Position.FromArrayCoordinates(y, x, board.TotalRows);
                     var figure = board.GetFigureAtPosition(position);
-                    PrintFigure(figure, backgroundColor, currentX, currentY);
+                    PrintFigure(Console, figure, backgroundColor, currentX, currentY);
 
                     counter++;
                 }
 
                 counter++;
             }
+        }
+
+        public Console ShowPiecePromotion(ChessColor color)
+        {
+            int possiblePromotions = 4;
+            int height = GlobalConstants.CharactersPerRowPerBoardSquare + GlobalConstants.BorderWidth * 2;
+            int width = GlobalConstants.CharactersPerColPerBoardSquare * possiblePromotions + GlobalConstants.BorderWidth * 2;
+            int x = (Console.Width - width) / 2;
+            int y = (Console.Height - height) / 2;
+            var console = new Console(width, height, normalSizedFont)
+            {
+                Position = new Point(x, y),
+                Parent = Console,
+                DefaultBackground = Color.Black
+            };
+
+            // border
+            var rect = new Rectangle(0, 0, width, height);
+            var cell = new Cell(Color.White, Color.SlateGray, 0);
+            console.DrawBox(rect, cell);
+
+            // create selection of figures
+            x = y = GlobalConstants.BorderWidth;
+            var figures = new List<IFigure>()
+            {
+                new Rook(color),
+                new Knight(color),
+                new Bishop(color),
+                new Queen(color)
+            };
+
+            // print figures
+            int counter = 1;
+            foreach (var figure in figures)
+            {
+                Color backgroundColor = (counter++ % 2 == 0) ? Color.LightSlateGray : Color.SlateGray;
+                PrintFigure(console, figure, backgroundColor, x, y);
+                x += GlobalConstants.CharactersPerColPerBoardSquare;
+            }
+
+            return console;
         }
 
         public void RemoveHighlight(Position position)
@@ -90,6 +135,7 @@
                 GlobalConstants.CharactersPerColPerBoardSquare, 
                 GlobalConstants.CharactersPerRowPerBoardSquare);
             var cell = new Cell(Color.White, color, 0);
+
             Console.DrawBox(rect, cell);
         }
 
@@ -165,7 +211,7 @@
             }
         }
 
-        void PrintFigure(IFigure figure, Color backgroundColor, int currentX, int currentY)
+        void PrintFigure(Console console, IFigure figure, Color backgroundColor, int currentX, int currentY)
         {
             if (figure is null)
             {
@@ -177,7 +223,7 @@
             {
                 for (int x = 0; x < figure.Pattern.GetLength(1); x++)
                 {
-                    Console.SetGlyph(currentX + x, currentY + y, figure.Pattern[y, x],
+                    console.SetGlyph(currentX + x, currentY + y, figure.Pattern[y, x],
                         figure.Color.ToConsoleColor(), backgroundColor);
                 }
             }

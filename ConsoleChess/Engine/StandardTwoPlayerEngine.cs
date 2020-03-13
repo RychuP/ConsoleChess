@@ -6,6 +6,8 @@
 
     // Libraries
     using SadConsole;
+    using SadConsole.Input;
+    using Console = SadConsole.Console;
     using Microsoft.Xna.Framework;
 
     // Chess
@@ -197,26 +199,48 @@
             return false;
         }
 
-        void MouseClickOnBoard(object sender, SadConsole.Input.MouseEventArgs e)
+        void MouseClickOnPromotionWindow(object sender, MouseEventArgs e)
         {
             if (e.MouseState.Mouse.LeftClicked)
             {
-                // convert mose x, y into chess coors of the board square
-                Point mousePosition = e.MouseState.CellPosition;
-                int column = (mousePosition.X - GlobalConstants.BorderWidth - 1)
-                    / GlobalConstants.CharactersPerColPerBoardSquare;
-                // prevent invalid coordinates
-                if (column >= board.TotalCols) column = board.TotalCols - 1;
-                char chessCoordX = (char)('a' + column);
+                var chessCoords = ConvertMouseCoordToChessCoord(e.MouseState.CellPosition);
+                switch (chessCoords.X)
+                {
+                    case 'c':
+                        renderer.Console.Children.Clear();
+                        renderer.Console.MouseMove += MouseClickOnBoard;
+                        renderer.RenderBoard(board);
+                        break;
+                }
+            }
+        }
 
-                int row = (mousePosition.Y - GlobalConstants.BorderWidth - 1)
-                    / GlobalConstants.CharactersPerRowPerBoardSquare;
-                // prevent invalid coordinates
-                if (row >= board.TotalRows) row = board.TotalRows - 1;
-                int chessCoordY = board.TotalRows - row;
+        (char X, int Y) ConvertMouseCoordToChessCoord(Point mousePosition)
+        {
+            // convert mouse x, y into chess coors of the board square
+            int column = (mousePosition.X - GlobalConstants.BorderWidth - 1)
+                / GlobalConstants.CharactersPerColPerBoardSquare;
+            // prevent invalid coordinates
+            if (column >= board.TotalCols) column = board.TotalCols - 1;
+            char chessCoordX = (char)('a' + column);
+
+            int row = (mousePosition.Y - GlobalConstants.BorderWidth - 1)
+                / GlobalConstants.CharactersPerRowPerBoardSquare;
+            // prevent invalid coordinates
+            if (row >= board.TotalRows) row = board.TotalRows - 1;
+            int chessCoordY = board.TotalRows - row;
+
+            return (chessCoordX, chessCoordY);
+        }
+
+        void MouseClickOnBoard(object sender, MouseEventArgs e)
+        {
+            if (e.MouseState.Mouse.LeftClicked)
+            {
+                var chessCoords = ConvertMouseCoordToChessCoord(e.MouseState.CellPosition);
 
                 // get objects relating to the selected board square
-                Position position = new Position(chessCoordY, chessCoordX);
+                Position position = new Position(chessCoords.Y, chessCoords.X);
                 IPlayer player = players[currentPlayerIndex];
                 IFigure figure, capturedFigure;
 
@@ -294,7 +318,9 @@
                                 int pawnOnlastRow = figure.Color == ChessColor.White ? 8 : 1;
                                 if (figure is Pawn && to.Row == pawnOnlastRow)
                                 {
-
+                                    renderer.Console.MouseMove -= MouseClickOnBoard;
+                                    var promotionConsole = renderer.ShowPiecePromotion(figure.Color);
+                                    promotionConsole.MouseMove += MouseClickOnPromotionWindow;
                                 }
 
                                 // letter for the score board

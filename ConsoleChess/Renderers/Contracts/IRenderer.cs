@@ -1,9 +1,16 @@
 ﻿namespace ConsoleChess.Renderers.Contracts
 {
-    using SadConsole;
-    using Board.Contracts;
-    using ConsoleChess.Common;
+    // .NET
+    using System;
+
+    // Libraries
+    using SadConsole.Input;
+    using Console = SadConsole.Console;
     using Microsoft.Xna.Framework;
+
+    // Chess
+    using Common;
+    using Board.Contracts;
 
     public interface IRenderer
     {
@@ -15,8 +22,10 @@
 
         Console Console { get; }
 
-        void RemoveHighlight(Position p);
+        void RemoveHighlight(Position pos);
 
-        void HighlightPosition(Position p, Color c);
+        void HighlightPosition(Position pos, Color col);
+
+        Console ShowPiecePromotion(ChessColor col);
     }
 }
