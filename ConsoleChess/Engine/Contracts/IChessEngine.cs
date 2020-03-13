@@ -11,5 +11,7 @@
         void Initialize(IGameInitializationStrategy gameInitializationStrategy);
 
         void WinningConditions();
+
+        void ToggleMenu();
     }
 }

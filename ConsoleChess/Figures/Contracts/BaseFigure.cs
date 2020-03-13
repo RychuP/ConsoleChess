@@ -11,13 +11,14 @@
         {
             Color = color;
             Moved = false;
+            Pattern = new int[2][,];
         }
 
         public abstract ICollection<IMovement> Move(IMovementStrategy strategy);
 
         public ChessColor Color { get; private set; }
 
-        public int[,] Pattern { get; protected set; }
+        public int[][,] Pattern { get; protected set; }
 
         public bool Moved { get; set; }
 

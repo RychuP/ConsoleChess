@@ -21,5 +21,7 @@
         Position GetKingsPosition(ChessColor color);
 
         IDictionary<IFigure, Position> GetOppositeArmy(ChessColor color);
+
+        void Initialize();
     }
 }

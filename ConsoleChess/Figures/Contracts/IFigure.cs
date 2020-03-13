@@ -11,7 +11,7 @@
 
         ICollection<IMovement> Move(IMovementStrategy movementStrategy);
 
-        int[,] Pattern { get; }
+        int[][,] Pattern { get; }
 
         bool Moved { get; set; }
 

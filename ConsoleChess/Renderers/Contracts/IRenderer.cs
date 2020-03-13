@@ -14,7 +14,7 @@
 
     public interface IRenderer
     {
-        void RenderMainMenu();
+        void RenderMainMenu(EventHandler e, EventHandler f);
 
         void RenderBoard(IBoard board);
 
@@ -27,5 +27,7 @@
         void HighlightPosition(Position pos, Color col);
 
         Console ShowPiecePromotion(ChessColor col);
+
+        void TogglePiecePatterns();
     }
 }

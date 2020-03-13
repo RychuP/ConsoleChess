@@ -36,7 +36,8 @@
 
         public King(ChessColor color) : base(color)
         {
-            Pattern = pattern2;
+            Pattern[0] = pattern;
+            Pattern[1] = pattern2;
             Letter = 'K';
         }
 

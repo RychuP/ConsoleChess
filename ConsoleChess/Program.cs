@@ -33,10 +33,8 @@
             var container = new ContainerConsole();
             Global.CurrentScreen = container;
 
-            // main class
+            // start the game
             var chessEngine = new StandardTwoPlayerEngine(container);
-
-            // initialize players, pieces and the board
             var gameInitializationStrategy = new StandardStartGameInitializationStrategy();
             chessEngine.Initialize(gameInitializationStrategy);
         }

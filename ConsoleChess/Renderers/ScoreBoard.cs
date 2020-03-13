@@ -37,6 +37,11 @@
 
         public void Initialize(IList<IPlayer> players)
         {
+            // clear data
+            moveLists.Clear();
+            scoreConsoles.Clear();
+            scoreBoardContainer.Children.Clear();
+
             // create individual consoles for each player
             int scoreConsoleWidth = GlobalConstants.UserInterfaceWidth / players.Count;
             int positionX = 0;

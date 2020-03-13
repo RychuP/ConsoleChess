@@ -10,7 +10,7 @@
 
     public class Board : IBoard
     {
-        private readonly IFigure[,] board;
+        IFigure[,] board;
 
         public Board(
             int rows = GlobalConstants.StandardGameTotalBoardRows,
@@ -18,12 +18,17 @@
         {
             TotalRows = rows;
             TotalCols = cols;
-            board = new IFigure[rows, cols];
+            Initialize();
         }
 
         public int TotalRows { get; private set; }
 
         public int TotalCols { get; private set; }
+
+        public void Initialize()
+        {
+            board = new IFigure[TotalRows, TotalCols];
+        }
 
         public void AddFigure(IFigure figure, Position position)
         {

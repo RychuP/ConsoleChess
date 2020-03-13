@@ -31,8 +31,13 @@
         readonly IBoard board;
         readonly IScoreBoard scoreBoard;
         readonly IList<Position> selectedPositions;
+        readonly KeyboardHandler keyboardHandler;
+
+        IGameInitializationStrategy gameInitialization;
+        Promotion promotion;
         IList<IPlayer> players;
-        int currentPlayerIndex = 1;
+        bool menuIsBeingShown = false;
+        int currentPlayerIndex;
 
         public StandardTwoPlayerEngine(ContainerConsole container)
         {
@@ -44,6 +49,11 @@
 
             // main event that drives the game
             renderer.Console.MouseMove += MouseClickOnBoard;
+
+            // keyboard
+            keyboardHandler = new KeyboardHandler(this);
+            container.IsFocused = true;
+            container.Components.Add(keyboardHandler);
         }
 
         public IEnumerable<IPlayer> Players
@@ -56,14 +66,22 @@
 
         public void Initialize(IGameInitializationStrategy gameInitializationStrategy)
         {
+            gameInitialization = gameInitializationStrategy;
+            Initialize();
+        }
+
+        void Initialize()
+        {
             // TODO: BUG: if players are changed - board is reversed
-            players = new List<IPlayer> 
+            players = new List<IPlayer>
             {
                 new Player("Black", ChessColor.Black),
                 new Player("White", ChessColor.White)
             };
-
-            gameInitializationStrategy.Initialize(players, board);
+            board.Initialize();
+            ResetMoves();
+            currentPlayerIndex = 1;
+            gameInitialization.Initialize(players, board);
             scoreBoard.Initialize(players);
             renderer.RenderBoard(board);
         }
@@ -128,6 +146,25 @@
             }
         }
 
+        public void ToggleMenu()
+        {
+            // don't show menu when promotion is in progress
+            if (promotion != null) return;
+
+            if (!menuIsBeingShown)
+            {
+                SuspendBoardMouseHandler();
+                renderer.RenderMainMenu(ButtonPressNewGame, ButtonPressChangeAppearance);
+                menuIsBeingShown = true;
+            }
+            else
+            {
+                RestoreBoardMouseHandler();
+                renderer.Console.Children.Clear();
+                menuIsBeingShown = false;
+            }
+        }
+
         (Rook Figure, Position Position, Position Destination) CheckIfCastlingPossible(ChessColor color, MoveType moveType)
         {
             char castlingDirection = (char)(moveType == MoveType.CastleKingSide ? 1 : -1);
@@ -163,7 +200,7 @@
             return (rook, rooksPosition, positionNextToKing);
         }
 
-        // checks if king is under attack and if the castling direction has been passed, also checks two adjecent squares
+        // checks if king is under attack and if the castling direction has been passed, also checks two adjacent squares
         bool KingIsUnderAttack(ChessColor color, Position testPosition, char? castlingDirection = null)
         {
             var oppositeColor = color == ChessColor.White ? ChessColor.Black : ChessColor.White;
@@ -189,7 +226,7 @@
                     }
                 }
 
-                // check adjecent positions during castling
+                // check adjacent positions during castling
                 if (castlingDirection.HasValue)
                 {
                     testPosition = new Position(testPosition.Row, (char)(testPosition.Col + castlingDirection.Value));
@@ -201,36 +238,75 @@
 
         void MouseClickOnPromotionWindow(object sender, MouseEventArgs e)
         {
+            if (promotion == null)
+            {
+                throw new Exception("Promotion data are missing!");
+            }
+
+            ChessColor color = promotion.Pawn.Color;
+
             if (e.MouseState.Mouse.LeftClicked)
             {
+                IFigure newFigure = null;
                 var chessCoords = ConvertMouseCoordToChessCoord(e.MouseState.CellPosition);
+
                 switch (chessCoords.X)
                 {
-                    case 'c':
-                        renderer.Console.Children.Clear();
-                        renderer.Console.MouseMove += MouseClickOnBoard;
-                        renderer.RenderBoard(board);
+                    case 'a':
+                        newFigure = new Rook(color);
                         break;
+
+                    case 'b':
+                        newFigure = new Knight(color);
+                        break;
+
+                    case 'c':
+                        newFigure = new Bishop(color);
+                        break;
+
+                    default:
+                        newFigure = new Queen(color);
+                        break;
+                }
+
+                if (newFigure != null)
+                {
+                    // replace figures
+                    board.RemoveFigure(promotion.Position);
+                    board.AddFigure(newFigure, promotion.Position);
+
+                    // remove piece selection window
+                    renderer.Console.Children.Clear();
+
+                    // restore game event and redraw board
+                    RestoreBoardMouseHandler();
+                    renderer.RenderBoard(board);
+
+                    // clear promotion object
+                    promotion = null;
                 }
             }
         }
 
-        (char X, int Y) ConvertMouseCoordToChessCoord(Point mousePosition)
+        void ButtonPressNewGame(object sender, EventArgs e)
         {
-            // convert mouse x, y into chess coors of the board square
-            int column = (mousePosition.X - GlobalConstants.BorderWidth - 1)
-                / GlobalConstants.CharactersPerColPerBoardSquare;
-            // prevent invalid coordinates
-            if (column >= board.TotalCols) column = board.TotalCols - 1;
-            char chessCoordX = (char)('a' + column);
+            renderer.Console.Children.Clear();
+            menuIsBeingShown = false;
+            Initialize();
+            RestoreBoardMouseHandler();
+        }
 
-            int row = (mousePosition.Y - GlobalConstants.BorderWidth - 1)
-                / GlobalConstants.CharactersPerRowPerBoardSquare;
-            // prevent invalid coordinates
-            if (row >= board.TotalRows) row = board.TotalRows - 1;
-            int chessCoordY = board.TotalRows - row;
+        void ButtonPressChangeAppearance(object sender, EventArgs e)
+        {
+            // change pattern
+            renderer.TogglePiecePatterns();
 
-            return (chessCoordX, chessCoordY);
+            // reset partial move on the score board
+            ResetMoves();
+            scoreBoard.RecordMove(players[currentPlayerIndex]);
+
+            // redraw board
+            renderer.RenderBoard(board);
         }
 
         void MouseClickOnBoard(object sender, MouseEventArgs e)
@@ -272,9 +348,7 @@
                         
                         try
                         {
-                            // TODO: Check pawn on last row
-                            // TODO: If not castle - move figure 
-                            // (check castle - check if castle is valid, check pawn for An-pasan)
+                            // TODO: An-pasan
                             // TODO: If in check - check checkmate
                             // TODO: If not in check - check draw
                             // TODO: display error messages
@@ -299,6 +373,7 @@
                             // normal move
                             else
                             {
+                                // check if move is valid and move the figure
                                 CheckIfToPositionIsEmpty(figure, position);
                                 var availableMovements = figure.Move(movementStrategy);
                                 ValidateMovements(figure, availableMovements, move);
@@ -318,9 +393,10 @@
                                 int pawnOnlastRow = figure.Color == ChessColor.White ? 8 : 1;
                                 if (figure is Pawn && to.Row == pawnOnlastRow)
                                 {
-                                    renderer.Console.MouseMove -= MouseClickOnBoard;
+                                    SuspendBoardMouseHandler();
                                     var promotionConsole = renderer.ShowPiecePromotion(figure.Color);
                                     promotionConsole.MouseMove += MouseClickOnPromotionWindow;
+                                    promotion = new Promotion(figure, to);
                                 }
 
                                 // letter for the score board
@@ -357,6 +433,34 @@
                         break;
                 }
             }
+        }
+
+        (char X, int Y) ConvertMouseCoordToChessCoord(Point mousePosition)
+        {
+            // convert mouse x, y into chess coors of the board square
+            int column = (mousePosition.X - GlobalConstants.BorderWidth - 1)
+                / GlobalConstants.CharactersPerColPerBoardSquare;
+            // prevent invalid coordinates
+            if (column >= board.TotalCols) column = board.TotalCols - 1;
+            char chessCoordX = (char)('a' + column);
+
+            int row = (mousePosition.Y - GlobalConstants.BorderWidth - 1)
+                / GlobalConstants.CharactersPerRowPerBoardSquare;
+            // prevent invalid coordinates
+            if (row >= board.TotalRows) row = board.TotalRows - 1;
+            int chessCoordY = board.TotalRows - row;
+
+            return (chessCoordX, chessCoordY);
+        }
+
+        void SuspendBoardMouseHandler()
+        {
+            renderer.Console.MouseMove -= MouseClickOnBoard;
+        }
+
+        void RestoreBoardMouseHandler()
+        {
+            renderer.Console.MouseMove += MouseClickOnBoard;
         }
 
         // resets the temporary list of clicked positions on the board
