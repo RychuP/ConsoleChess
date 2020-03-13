@@ -1,7 +1,9 @@
 ﻿namespace ConsoleChess.Figures
 {
+    // .NET
     using System.Collections.Generic;
 
+    // Chess
     using Common;
     using Contracts;
     using Movements.Contracts;
@@ -35,11 +37,12 @@
         public Rook(ChessColor color) : base(color)
         {
             Pattern = pattern2;
+            Letter = 'Q';
         }
 
         public override ICollection<IMovement> Move(IMovementStrategy strategy)
         {
-            return strategy.GetMovements(this.GetType().Name);
+            return strategy.GetMovements(GetType().Name);
         }
     }
 }

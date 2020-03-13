@@ -1,7 +1,9 @@
 ﻿namespace ConsoleChess.Figures
 {
+    // .NET
     using System.Collections.Generic;
 
+    // Chess
     using Common;
     using Contracts;
     using Movements.Contracts;
@@ -35,6 +37,7 @@
         public Pawn(ChessColor color) : base(color)
         {
             Pattern = pattern2;
+            Letter = 'P';
         }
 
         public override ICollection<IMovement> Move(IMovementStrategy strategy)

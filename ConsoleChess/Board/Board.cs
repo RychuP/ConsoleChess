@@ -60,6 +60,8 @@
             int arrToRow = GetArrayRow(to.Row);
             int arrToCol = GetArrayCol(to.Col);
             board[arrToRow, arrToCol] = figure;
+
+            figure.Moved = true;
         }
 
         public Position GetKingsPosition(ChessColor color)

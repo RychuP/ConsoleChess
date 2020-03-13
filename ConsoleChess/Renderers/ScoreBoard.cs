@@ -117,10 +117,7 @@
             int x = displayTrophiesOnLeftSide ? 1 : console.Width - 2;
             foreach (var figure in trophies)
             {
-                string type = figure.GetType().ToString();
-                type = type.Substring(type.LastIndexOf('.') + 1);
-                char figureLetter = type == "Knight" ? 'N' : type[0];
-                console.SetGlyph(x, row++, figureLetter, fontColor);
+                console.SetGlyph(x, row++, figure.Letter, fontColor);
             }
         }
 
