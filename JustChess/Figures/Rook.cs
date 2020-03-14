@@ -38,7 +38,7 @@
         {
             Pattern[0] = pattern;
             Pattern[1] = pattern2;
-            Letter = 'Q';
+            Letter = 'R';
         }
 
         public override ICollection<IMovement> Move(IMovementStrategy strategy)

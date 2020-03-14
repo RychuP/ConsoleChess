@@ -1,16 +1,17 @@
 # Console Chess
 
-SadConsole port of JustChess by Ivaylo Kenov (and, by the looks of it, his students too).
+Console Chess Game for the OOP course at Telerik Academy.
 
-This version will work out of the box without the need to change system console size or its font.
+Original code required change of system console size and its font to run correctly.
+Modified version utilizes SadConsole to remove the above limitations and improve the looks slightly.
 
-Planned:
-- add the missing menu
-- finish "TODO"s
-- replace keyboard input with mouse support
+Most of the chess mechanics are implemented apart from:
+- check mate detection
+- "en passant" pawn capture
 
+Press Escape for the game menu and use mouse to move chess pieces.
 
-## Work in progress (Screenshot)
+## Screenshots
 
 ![screenshot](/screenshot.png)
 
