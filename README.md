@@ -1,9 +1,6 @@
 # JustChess
 
-Console Chess Game for the OOP course at Telerik Academy.
-
-Original code required change of system console size and its font to run correctly.
-Modified version utilizes SadConsole to remove the above limitations and improve the looks slightly.
+A partial implementation of chess in SadConsole based on a repo authored by Ivaylo Kenov written using System.Console as the main rendering engine.
 
 Most of the chess mechanics are implemented apart from:
 - check mate detection
